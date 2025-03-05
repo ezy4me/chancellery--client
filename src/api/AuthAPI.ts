@@ -6,7 +6,7 @@ interface LoginRequest {
 }
 
 interface LoginResponse {
-  accesToken: string;
+  accessToken: string;
   refreshToken: {
     token: string;
     exp: string;

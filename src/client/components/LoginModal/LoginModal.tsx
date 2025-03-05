@@ -66,7 +66,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         dispatch(
           setCredentials({
-            token: response.accesToken,
+            token: response.accessToken,
             refreshToken: response.refreshToken.token,
             user: response.user,
           })

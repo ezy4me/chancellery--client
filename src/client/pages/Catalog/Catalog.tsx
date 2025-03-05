@@ -14,7 +14,7 @@ import { RootState } from "../../../store";
 const Catalog: React.FC = () => {
   const { data: products, error, isLoading } = useGetProductsQuery();
   const userId = useSelector((state: RootState) => state.auth.user?.id);
-  const { data: wishlist } = useGetWishlistQuery(userId!, {
+  const { data: wishlist, refetch } = useGetWishlistQuery(userId!, {
     skip: !userId,
   });
 
@@ -35,6 +35,7 @@ const Catalog: React.FC = () => {
     return <div className={styles.error}>Ошибка при загрузке товаров!</div>;
   }
 
+  // Проверка, есть ли товар в избранном
   const isInWishlist = (productId: number) => {
     return wishlist?.some((item) => item.product.id === productId);
   };
@@ -50,6 +51,8 @@ const Catalog: React.FC = () => {
     } else {
       await addToWishlist({ userId, productId });
     }
+
+    await refetch(); // 🔄 Обновляем избранное после изменения
   };
 
   return (

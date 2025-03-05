@@ -13,6 +13,7 @@ const Header = () => {
         <nav className={styles.header__nav}>
           <Link to="/catalog" className={styles.header__link}>Каталог</Link>
           <Link to="/orders" className={styles.header__link}>Заказы</Link>
+          <Link to="/favorites" className={styles.header__link}>Мне нравится</Link>
           <button className={styles.header__button} onClick={() => setIsModalOpen(true)}>Войти</button>
         </nav>
       </div>

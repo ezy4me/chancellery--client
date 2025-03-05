@@ -1,8 +1,10 @@
 @use "/src/assets/styles/variables" as *;
+@use "sass:color";
 
 .notFound {
     text-align: center;
     padding: 50px;
+    height: 100vh;
 
     &__title {
         font-size: 80px;
@@ -25,7 +27,7 @@
         border-radius: 5px;
 
         &:hover {
-            background: darken($primary-color, 10%);
+            background: color.adjust(black, $lightness: -10%);
         }
     }
 }

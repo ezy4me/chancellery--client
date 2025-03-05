@@ -1,0 +1,164 @@
+@use "/src/assets/styles/variables" as *;
+@use "sass:color";
+
+.checkoutPage {
+  border-radius: 15px;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+}
+
+h1 {
+  text-align: center;
+  color: $primary-color;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+  color: "#202020";
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 5px rgba($primary-color, 0.5);
+  }
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  background-color: $secondary-color;
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    transform 0.3s;
+
+  &:hover {
+    background: color.adjust($secondary-color, $lightness: -10%);
+    transform: translateY(-2px); /* Slight lift effect on hover */
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.cartList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+  img {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  div {
+    flex-grow: 1;
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin: 0;
+      color: "#202020";
+    }
+
+    p {
+      margin: 5px 0;
+      color: "#121212";
+    }
+
+    input {
+      width: 70px;
+      padding: 5px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 8px;
+      background-color: #ff4d4d;
+      &:hover {
+        background-color: #e03e3e;
+      }
+    }
+  }
+}
+
+.totalPrice {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-top: 20px;
+  color: $primary-color;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .checkoutPage {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+}

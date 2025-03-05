@@ -35,7 +35,6 @@ const Catalog: React.FC = () => {
     return <div className={styles.error}>Ошибка при загрузке товаров!</div>;
   }
 
-  // Проверка, есть ли товар в избранном
   const isInWishlist = (productId: number) => {
     return wishlist?.some((item) => item.product.id === productId);
   };
@@ -52,7 +51,21 @@ const Catalog: React.FC = () => {
       await addToWishlist({ userId, productId });
     }
 
-    await refetch(); // 🔄 Обновляем избранное после изменения
+    await refetch();
+  };
+
+  const addToCart = (product: any) => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existingProduct = cart.find((item: any) => item.id === product.id);
+
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Товар добавлен в корзину!");
   };
 
   return (
@@ -71,14 +84,13 @@ const Catalog: React.FC = () => {
               <h3 className={styles.catalogName}>{product.name}</h3>
               <p className={styles.catalogDescription}>{product.description}</p>
               <div className={styles.catalogPrice}>{product.price} ₽</div>
-              <Link
-                to={`/product/${product.id}`}
-                className={styles.catalogLink}>
+              <Link to={`/product/${product.id}`} className={styles.catalogLink}>
                 Подробнее
               </Link>
-              <button
-                className={styles.wishlistButton}
-                onClick={() => handleWishlistToggle(product.id)}>
+              <button className={styles.orderButton} onClick={() => addToCart(product)}>
+                Заказать
+              </button>
+              <button className={styles.wishlistButton} onClick={() => handleWishlistToggle(product.id)}>
                 {isInWishlist(product.id) ? (
                   <FaHeart className={styles.heartIconFilled} />
                 ) : (

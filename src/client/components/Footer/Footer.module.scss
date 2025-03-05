@@ -1,0 +1,17 @@
+@use "/src/assets/styles/variables" as *;
+
+.footer {
+    background: $dark-gray;
+    padding: 20px 0;
+    text-align: center;
+
+    &__container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    &__text {
+        color: $white;
+        font-size: 14px;
+    }
+}

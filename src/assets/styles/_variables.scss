@@ -1,0 +1,48 @@
+@use "sass:color";
+
+$primary-color: #2c3e50;
+$dark-gray: #212121;
+$secondary-color: #3498db;
+$danger-color: #e74c3c;
+$white: #ffffff;
+
+// Шрифты и отступы
+$button-font-size: 16px;
+$button-padding: 10px 20px;
+$button-border-radius: 5px;
+$button-font-weight: bold;
+$button-transition: 0.3s ease-in-out;
+
+// Тема кнопки
+$button-background: $secondary-color;
+$button-text-color: $white;
+$button-border: none;
+
+// Hover эффект
+$button-hover-background: color.adjust($primary-color, $lightness: -10%);
+$button-hover-border: none;
+$button-hover-color: $white;
+
+.button {
+    background: $button-background;
+    color: $button-text-color;
+    padding: $button-padding;
+    font-size: $button-font-size;
+    font-weight: $button-font-weight;
+    border-radius: $button-border-radius;
+    border: $button-border;
+    cursor: pointer;
+    transition:
+        background-color $button-transition,
+        color $button-transition;
+
+    &:hover {
+        background-color: $button-hover-background;
+        color: $button-hover-color;
+        border: $button-hover-border;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}

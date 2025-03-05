@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { api } from "./index";
 
 interface Product {
   id: number;
@@ -26,13 +26,15 @@ export const productApi = api.injectEndpoints({
         body: data,
       }),
     }),
-    updateProduct: builder.mutation<Product, Partial<Product> & { id: number }>({
-      query: ({ id, ...data }) => ({
-        url: `product/${id}`,
-        method: "PUT",
-        body: data,
-      }),
-    }),
+    updateProduct: builder.mutation<Product, Partial<Product> & { id: number }>(
+      {
+        query: ({ id, ...data }) => ({
+          url: `product/${id}`,
+          method: "PUT",
+          body: data,
+        }),
+      }
+    ),
     deleteProduct: builder.mutation<{ success: boolean; id: number }, number>({
       query: (id) => ({
         url: `product/${id}`,

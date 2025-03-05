@@ -1,51 +1,200 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { FaUser, FaLock, FaTimes, FaSpinner } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useLoginMutation, useRegisterMutation } from "../../../api/AuthAPI";
+import { setCredentials } from "../../../store/authSlice";
 import styles from "./LoginModal.module.scss";
 
-const LoginModal = ({
-  isOpen,
-  onClose,
-}: {
+interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-}) => {
+}
+
+interface FormData {
+  email: string;
+  password: string;
+  passwordRepeat?: string;
+}
+
+const loginSchema = yup.object().shape({
+  email: yup.string().email("Неверный формат email").required("Введите email"),
+  password: yup
+    .string()
+    .min(6, "Минимум 6 символов")
+    .required("Введите пароль"),
+});
+
+const registerSchema = yup.object().shape({
+  email: yup.string().email("Неверный формат email").required("Введите email"),
+  password: yup
+    .string()
+    .min(6, "Минимум 6 символов")
+    .required("Введите пароль"),
+  passwordRepeat: yup
+    .string()
+    .oneOf([yup.ref("password")], "Пароли должны совпадать")
+    .required("Повторите пароль"),
+});
+
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
+  const [register, { isLoading: isRegistering }] = useRegisterMutation();
+
+  const {
+    handleSubmit,
+    register: formRegister,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(isLogin ? loginSchema : registerSchema),
+  });
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (isLogin) {
+        const response = await login({
+          email: data.email,
+          password: data.password,
+        }).unwrap();
+
+        dispatch(
+          setCredentials({
+            token: response.accesToken,
+            refreshToken: response.refreshToken.token,
+            user: response.user,
+          })
+        );
+
+        const userRole = response.user.role;
+        navigate(
+          userRole === "ADMIN"
+            ? "/admin"
+            : userRole === "EMPLOYEE"
+            ? "/employee"
+            : "/profile"
+        );
+      } else {
+        await register({
+          email: data.email,
+          password: data.password,
+          passwordRepeat: data.passwordRepeat!,
+          role: "USER",
+        }).unwrap();
+        setIsLogin(true);
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Ошибка авторизации:", error);
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className={styles.modal}>
-      <div className={styles.modal__overlay} />
-      <div className={styles.modal__content}>
-        <h2 className={styles.modal__title}>
+    <Dialog open={isOpen} onClose={onClose} className={styles["modal"]}>
+      <div className={styles["modal__overlay"]} />
+      <div className={styles["modal__content"]}>
+        <button className={styles["modal__close"]} onClick={onClose}>
+          <FaTimes />
+        </button>
+        <h2 className={styles["modal__title"]}>
           {isLogin ? "Вход" : "Регистрация"}
         </h2>
-        <form className={styles.modal__form}>
+
+        <form
+          className={styles["modal__form"]}
+          onSubmit={handleSubmit(onSubmit)}>
+          <div className={styles["modal__field"]}>
+            <label className={styles["modal__label"]} htmlFor="email">
+              Email
+            </label>
+            <div className={styles["modal__input-wrapper"]}>
+              <FaUser className={styles["modal__icon"]} />
+              <input
+                {...formRegister("email")}
+                className={styles["modal__input"]}
+                placeholder="Введите email"
+                autoComplete="email"
+              />
+            </div>
+            {errors.email && (
+              <p className={styles["modal__error"]}>{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className={styles["modal__field"]}>
+            <label className={styles["modal__label"]} htmlFor="password">
+              Пароль
+            </label>
+            <div className={styles["modal__input-wrapper"]}>
+              <FaLock className={styles["modal__icon"]} />
+              <input
+                type="password"
+                {...formRegister("password")}
+                className={styles["modal__input"]}
+                placeholder="Введите пароль"
+                autoComplete={isLogin ? "current-password" : "new-password"}
+              />
+            </div>
+            {errors.password && (
+              <p className={styles["modal__error"]}>
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
           {!isLogin && (
-            <input
-              type="text"
-              placeholder="Имя"
-              className={styles.modal__input}
-            />
+            <div className={styles["modal__field"]}>
+              <label
+                className={styles["modal__label"]}
+                htmlFor="passwordRepeat">
+                Повторите пароль
+              </label>
+              <div className={styles["modal__input-wrapper"]}>
+                <FaLock className={styles["modal__icon"]} />
+                <input
+                  type="password"
+                  {...formRegister("passwordRepeat")}
+                  className={styles["modal__input"]}
+                  placeholder="Повторите пароль"
+                  autoComplete="new-password"
+                />
+              </div>
+              {errors.passwordRepeat && (
+                <p className={styles["modal__error"]}>
+                  {errors.passwordRepeat.message}
+                </p>
+              )}
+            </div>
           )}
-          <input
-            type="email"
-            placeholder="Email"
-            className={styles.modal__input}
-          />
-          <input
-            type="password"
-            placeholder="Пароль"
-            className={styles.modal__input}
-          />
-          <button type="submit" className={styles.modal__button}>
-            {isLogin ? "Войти" : "Зарегистрироваться"}
+
+          <button
+            type="submit"
+            className={styles["modal__button"]}
+            disabled={isLoggingIn || isRegistering}>
+            {isLoggingIn || isRegistering ? (
+              <FaSpinner className={styles["modal__spinner"]} />
+            ) : isLogin ? (
+              "Войти"
+            ) : (
+              "Зарегистрироваться"
+            )}
           </button>
         </form>
-        <p
-          className={styles.modal__toggle}
-          onClick={() => setIsLogin(!isLogin)}>
-          {isLogin
-            ? "Нет аккаунта? Зарегистрируйтесь!"
-            : "Уже есть аккаунт? Войти"}
+
+        <p className={styles["modal__toggle"]}>
+          {isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"}
+          <span
+            onClick={() => setIsLogin(!isLogin)}
+            className={styles["modal__toggle-link"]}>
+            {isLogin ? "Зарегистрироваться" : "Войти"}
+          </span>
         </p>
       </div>
     </Dialog>

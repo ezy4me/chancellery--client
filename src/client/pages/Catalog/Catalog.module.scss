@@ -1,70 +1,91 @@
-.catalog-page {
+@use "/src/assets/styles/variables" as *;
+
+.catalogPage {
     padding: 20px;
-  }
-  
-  .catalog-page h1 {
+}
+
+.title {
     font-size: 2rem;
     margin-bottom: 20px;
     text-align: center;
-  }
-  
-  .catalog-grid {
+    color: $primary-color;
+}
+
+.catalogGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
-  }
-  
-  .catalog-item {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+}
+
+.catalogItem {
     background-color: #fff;
-    transition: transform 0.3s ease;
-  }
-  
-  .catalog-item:hover {
-    transform: translateY(-10px);
-  }
-  
-  .catalog-item__image {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+.catalogImage {
     width: 100%;
-    height: auto;
-    border-radius: 5px;
-  }
-  
-  .catalog-item__info {
-    margin-top: 10px;
-  }
-  
-  .catalog-item__name {
-    font-size: 1.2rem;
+    height: 200px;
+    object-fit: cover;
+}
+
+.catalogInfo {
+    padding: 15px;
+}
+
+.catalogName {
+    font-size: 1.3rem;
     font-weight: bold;
-  }
-  
-  .catalog-item__description {
+    margin-bottom: 10px;
+}
+
+.catalogDescription {
     font-size: 0.9rem;
     color: #555;
-    margin-top: 5px;
-  }
-  
-  .catalog-item__price {
-    font-size: 1rem;
-    color: #000;
+    margin-bottom: 10px;
+}
+
+.catalogPrice {
+    font-size: 1.2rem;
+    color: $primary-color;
     font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  .catalog-item__link {
+    margin-bottom: 10px;
+}
+
+.catalogLink {
     display: inline-block;
-    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: $secondary-color;
+    color: #fff;
+    border-radius: 5px;
     text-decoration: none;
-    color: #007bff;
     font-weight: bold;
-    transition: color 0.3s;
-  }
-  
-  .catalog-item__link:hover {
-    color: #0056b3;
-  }
-  
+    transition: background 0.3s;
+
+    &:hover {
+        background-color: darken($secondary-color, 10%);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .catalogGrid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .catalogGrid {
+        grid-template-columns: 1fr;
+    }
+}

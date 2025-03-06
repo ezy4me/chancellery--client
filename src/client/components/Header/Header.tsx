@@ -10,6 +10,13 @@ const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
 
+  // Определяем путь к профилю в зависимости от роли
+  const getProfilePath = () => {
+    if (user?.role === "ADMIN") return "/admin";
+    if (user?.role === "MANAGER") return "/manager";
+    return "/auth/profile";
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.header__container}>
@@ -27,8 +34,8 @@ const Header = () => {
             <AiOutlineHeart size={20} />
           </Link>
 
-          {user?.role ? (
-            <Link to="/auth/profile" className={styles.header__button}>
+          {user ? (
+            <Link to={getProfilePath()} className={styles.header__button}>
               Профиль
             </Link>
           ) : (
@@ -40,7 +47,6 @@ const Header = () => {
           )}
         </nav>
       </div>
-      {/* Модальное окно для логина */}
       <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </header>
   );

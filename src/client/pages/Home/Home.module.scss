@@ -4,7 +4,9 @@
 .home {
     text-align: center;
     padding: 50px;
-    height: 100vh;
+    min-height: 100vh;
+    max-width: 1280px;
+    margin: 0 auto;
 
     &__title {
         font-size: 32px;

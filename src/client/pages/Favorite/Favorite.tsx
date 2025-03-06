@@ -1,3 +1,4 @@
+import { Spin, Alert } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
@@ -23,28 +24,45 @@ const Favorites: React.FC = () => {
   const [removeFromWishlist] = useRemoveFromWishlistMutation();
 
   if (!userId) {
-    return <div className={styles.message}>Пожалуйста, войдите в аккаунт.</div>;
+    return (
+      <div className={styles.favoritesPage}>
+        <div className={styles.message}>Пожалуйста, войдите в аккаунт.</div>
+      </div>
+    );
   }
 
   if (isLoading) {
-    return <div className={styles.message}>Загрузка...</div>;
+    return (
+      <div className={styles.favoritesPage}>
+        <Spin
+          size="large"
+          style={{ display: "block", margin: "auto", marginTop: 50 }}
+        />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className={styles.message}>Ошибка при загрузке данных.</div>;
+    return (
+      <div className={styles.favoritesPage}>
+        <Alert message="Ошибка при загрузке данных" type="error" showIcon />
+      </div>
+    );
   }
 
   if (!wishlist || wishlist.length === 0) {
     return (
-      <div className={styles.message}>
-        Вы пока ничего не добавили в избранное.
+      <div className={styles.favoritesPage}>
+        <div className={styles.message}>
+          Вы пока ничего не добавили в избранное.
+        </div>
       </div>
     );
   }
 
   const handleRemove = async (productId: number) => {
     await removeFromWishlist({ userId, productId });
-    await refetch(); // 🔥 Обновляем список после удаления
+    await refetch();
   };
 
   return (

@@ -1,3 +1,4 @@
+import { Spin, Alert } from "antd";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./Checkout.module.scss";
@@ -55,11 +56,6 @@ const Checkout: React.FC = () => {
       price: item.price,
     }));
 
-    const totalPrice = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
     const orderData = {
       orderItems: orderItems,
       totalPrice: totalPrice,
@@ -84,6 +80,26 @@ const Checkout: React.FC = () => {
     }
   };
 
+  // Загрузка или ошибка
+  if (isLoading) {
+    return (
+      <div className={styles.checkoutPage}>
+        <Spin
+          size="large"
+          style={{ display: "block", margin: "auto", marginTop: 50 }}
+        />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.checkoutPage}>
+        <Alert message="Ошибка при загрузке данных" type="error" showIcon />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.checkoutPage}>
       <h1>Оформление заказа</h1>
@@ -104,6 +120,9 @@ const Checkout: React.FC = () => {
                         : (item.image as string)
                     }
                     alt={item.name}
+                    onError={(e) =>
+                      (e.currentTarget.src = "/public/placeholder.jpg")
+                    }
                   />
                   <div>
                     <h3>{item.name}</h3>

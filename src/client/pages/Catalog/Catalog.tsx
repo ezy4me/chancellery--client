@@ -1,3 +1,4 @@
+import { Spin, Alert } from "antd";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -28,11 +29,22 @@ const Catalog: React.FC = () => {
   }, [error]);
 
   if (isLoading) {
-    return <div className={styles.loader}>Загрузка...</div>;
+    return (
+      <div className={styles.catalogPage}>
+        <Spin
+          size="large"
+          style={{ display: "block", margin: "auto", marginTop: 50 }}
+        />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>Ошибка при загрузке товаров!</div>;
+    return (
+      <div className={styles.catalogPage}>
+        <Alert message="Ошибка загрузки данных" type="error" showIcon />;
+      </div>
+    );
   }
 
   const isInWishlist = (productId: number) => {
@@ -84,13 +96,19 @@ const Catalog: React.FC = () => {
               <h3 className={styles.catalogName}>{product.name}</h3>
               <p className={styles.catalogDescription}>{product.description}</p>
               <div className={styles.catalogPrice}>{product.price} ₽</div>
-              <Link to={`/product/${product.id}`} className={styles.catalogLink}>
+              <Link
+                to={`/product/${product.id}`}
+                className={styles.catalogLink}>
                 Подробнее
               </Link>
-              <button className={styles.orderButton} onClick={() => addToCart(product)}>
+              <button
+                className={styles.orderButton}
+                onClick={() => addToCart(product)}>
                 Заказать
               </button>
-              <button className={styles.wishlistButton} onClick={() => handleWishlistToggle(product.id)}>
+              <button
+                className={styles.wishlistButton}
+                onClick={() => handleWishlistToggle(product.id)}>
                 {isInWishlist(product.id) ? (
                   <FaHeart className={styles.heartIconFilled} />
                 ) : (

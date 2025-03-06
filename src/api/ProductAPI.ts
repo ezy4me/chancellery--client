@@ -19,7 +19,7 @@ export const productApi = api.injectEndpoints({
     getProductById: builder.query<Product, number>({
       query: (id) => `product/${id}`,
     }),
-    createProduct: builder.mutation<Product, Omit<Product, "id">>({
+    createProduct: builder.mutation<any, any>({
       query: (data) => ({
         url: `product`,
         method: "POST",

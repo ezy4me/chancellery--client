@@ -78,7 +78,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             ? "/admin"
             : userRole === "EMPLOYEE"
             ? "/employee"
-            : "/profile"
+            : "/auth/profile"
         );
       } else {
         await register({

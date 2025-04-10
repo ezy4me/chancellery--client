@@ -272,3 +272,49 @@
         justify-content: center;
     }
 }
+
+.filterPanel {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  
+    .searchInput {
+      flex: 1;
+      min-width: 250px;
+    }
+  
+    .categorySelect {
+      min-width: 200px;
+    }
+  }
+  
+  .emptyState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    padding: 20px 0;
+  }
+  
+  /* Адаптивность для фильтров */
+  @media (max-width: 768px) {
+    .filterPanel {
+      flex-direction: column;
+      gap: 15px;
+  
+      .searchInput,
+      .categorySelect {
+        width: 100%;
+      }
+    }
+  }

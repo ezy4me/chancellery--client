@@ -5,7 +5,7 @@ import Footer from "../client/components/Footer/Footer";
 
 const MainLayout: React.FC = () => {
   return (
-    <div>
+    <div style={{padding: "10px 20px"}}>
       <Header />
       <main>
         <Outlet />{" "}

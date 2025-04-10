@@ -258,3 +258,105 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+.orderModal {
+    .ant-modal-content {
+        border-radius: 12px;
+    }
+
+    .ant-modal-header {
+        border-radius: 12px 12px 0 0;
+        border-bottom: 1px dashed $border-color;
+    }
+}
+
+.modalContent {
+    padding: 10px;
+    overflow: auto;
+
+}
+
+.orderSummary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.summaryItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+
+    h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: $text-secondary;
+    }
+
+    p {
+        margin: 5px 0 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    &:last-child{
+        justify-content: center;
+    }
+}
+
+.summaryIcon {
+    font-size: 1.5rem;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    color: $dark-gray;
+    margin-bottom: 15px;
+}
+
+.sectionIcon {
+    color: $primary-color;
+}
+
+.paymentInfo {
+    p {
+        margin: 8px 0;
+        font-size: 1.05rem;
+    }
+}
+
+.orderItemsTable {
+    margin: 20px 0;
+
+    .ant-table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .ant-table-thead > tr > th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+}
+
+@media (max-width: 768px) {
+    .orderSummary {
+        flex-direction: column;
+    }
+
+    .summaryItem {
+        width: 100%;
+    }
+
+    .orderModal {
+        width: 95% !important;
+        max-width: 100%;
+    }
+}

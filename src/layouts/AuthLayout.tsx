@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 
 const AuthLayout = () => {
   return (
-    <div>
+    <div style={{padding: "10px 20px"}}>
       <Header />
       <main>
         <Outlet />{" "}

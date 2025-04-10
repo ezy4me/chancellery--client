@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Typography, Divider, Spin, Alert, Image } from "antd";
+import { Card, Row, Col, Typography, Divider, Spin, Alert } from "antd";
 import {
   FaPrint,
   FaPalette,

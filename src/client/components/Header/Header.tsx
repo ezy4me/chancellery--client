@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import {
   AiOutlineShoppingCart,
-  AiOutlineCalculator,
   AiOutlineUser,
   AiOutlineHeart,
 } from "react-icons/ai";
@@ -51,10 +50,10 @@ const Header = () => {
             <HiOutlineDocumentText size={24} />
             <span>Услуги</span>
           </Link>
-          <Link to="/calculator" className={styles.link}>
+          {/* <Link to="/calculator" className={styles.link}>
             <AiOutlineCalculator size={24} />
             <span>Калькулятор</span>
-          </Link>
+          </Link> */}
           <Link to="/checkout" className={styles.link}>
             <AiOutlineShoppingCart size={24} />
             <span>Заказы</span>
@@ -104,10 +103,10 @@ const Header = () => {
               <HiOutlineDocumentText size={24} />
               <span>Услуги</span>
             </Link>
-            <Link to="/calculator" className={styles.link} onClick={toggleMenu}>
+            {/* <Link to="/calculator" className={styles.link} onClick={toggleMenu}>
               <AiOutlineCalculator size={24} />
               <span>Калькулятор</span>
-            </Link>
+            </Link> */}
             <Link to="/checkout" className={styles.link} onClick={toggleMenu}>
               <AiOutlineShoppingCart size={24} />
               <span>Заказы</span>

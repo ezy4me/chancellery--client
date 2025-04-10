@@ -1,7 +1,7 @@
-import { Spin, Alert, Empty } from "antd";
+import { Spin, Alert, Empty, notification } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaTrash, FaHeart } from "react-icons/fa";
+import { FaTrash, FaHeart, FaShoppingCart } from "react-icons/fa";
 import { GiShoppingBag } from "react-icons/gi";
 import styles from "./Favorite.module.scss";
 import {
@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 
 const Favorites: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
   const userId = useSelector((state: RootState) => state.auth.user?.id);
   const {
     data: wishlist,
@@ -23,6 +24,24 @@ const Favorites: React.FC = () => {
   });
 
   const [removeFromWishlist] = useRemoveFromWishlistMutation();
+
+  const addToCart = (product: any) => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existingProduct = cart.find((item: any) => item.id === product.id);
+
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    api.success({
+      message: 'Товар добавлен в корзину',
+      description: `${product.name} успешно добавлен в вашу корзину`,
+      placement: 'topRight',
+    });
+  };
 
   if (!userId) {
     return (
@@ -86,6 +105,8 @@ const Favorites: React.FC = () => {
 
   return (
     <div className={styles.favoritesPage}>
+      {contextHolder}
+      
       <div className={styles.header}>
         <h1 className={styles.title}>
           <FaHeart className={styles.titleIcon} /> Избранное
@@ -124,12 +145,12 @@ const Favorites: React.FC = () => {
                 <div className={styles.favoritesPrice}>
                   {item.product.price} ₽
                 </div>
-                <Link
-                  to={`/product/${item.product.id}`}
-                  className={styles.favoritesLink}
+                <button
+                  onClick={() => addToCart(item.product)}
+                  className={styles.addToCartButton}
                 >
-                  Подробнее
-                </Link>
+                  <FaShoppingCart className={styles.cartIcon} />
+                </button>
               </div>
             </div>
           </div>

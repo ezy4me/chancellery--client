@@ -1,10 +1,16 @@
-import { Spin, Alert } from "antd";
+import { Spin, Alert, Radio, Card, Button, Divider, notification } from "antd";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./Checkout.module.scss";
 import { RootState } from "../../../store";
 import { useCreateOrderMutation } from "../../../api/OrderAPI";
-import { ShoppingCartOutlined } from "@ant-design/icons";
+import {
+  ShoppingCartOutlined,
+  CreditCardOutlined,
+  BankOutlined,
+  WalletOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 
 interface CartItem {
   id: number;
@@ -14,15 +20,93 @@ interface CartItem {
   image?: string | {};
 }
 
+const paymentMethods = [
+  {
+    value: "card",
+    label: "Картой онлайн",
+    icon: <CreditCardOutlined />,
+    description: "Оплата банковской картой Visa, Mastercard, Мир",
+  },
+  {
+    value: "sbp",
+    label: "СБП",
+    icon: <BankOutlined />,
+    description: "Оплата через Систему Быстрых Платежей",
+  },
+  {
+    value: "cash",
+    label: "Наличные",
+    icon: <WalletOutlined />,
+    description: "Оплата наличными при получении",
+  },
+];
+
 const Checkout: React.FC = () => {
+  const [notificationApi, notificationContextHolder] =
+    notification.useNotification();
   const userId = useSelector((state: RootState) => state.auth.user?.id);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState("card");
   const [createOrder, { isLoading, isError }] = useCreateOrderMutation();
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
+  const [showWarningNotification, setShowWarningNotification] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCart(storedCart);
   }, []);
+
+  useEffect(() => {
+    if (showSuccessNotification) {
+      notificationApi.success({
+        message: (
+          <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+            <CheckCircleOutlined
+              style={{ color: "#52c41a", marginRight: "8px" }}
+            />
+            Заказ успешно оформлен!
+          </span>
+        ),
+        description: (
+          <div style={{ marginTop: "8px" }}>
+            <p>Спасибо за ваш заказ!</p>
+            <p>Мы свяжемся с вами в ближайшее время для подтверждения.</p>
+          </div>
+        ),
+        placement: "topRight",
+        duration: 8,
+        style: {
+          width: "350px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        },
+      });
+      setShowSuccessNotification(false);
+    }
+  }, [showSuccessNotification]);
+
+  useEffect(() => {
+    if (showErrorNotification) {
+      notificationApi.error({
+        message: "Ошибка оформления заказа",
+        description: "Пожалуйста, попробуйте еще раз",
+        placement: "topRight",
+      });
+      setShowErrorNotification(false);
+    }
+  }, [showErrorNotification]);
+
+  useEffect(() => {
+    if (showWarningNotification) {
+      notificationApi.warning({
+        message: "Требуется авторизация",
+        description: "Войдите в аккаунт для оформления заказа",
+        placement: "topRight",
+      });
+      setShowWarningNotification(false);
+    }
+  }, [showWarningNotification]);
 
   const updateQuantity = (productId: number, quantity: number) => {
     const updatedCart = cart.map((item) =>
@@ -47,7 +131,7 @@ const Checkout: React.FC = () => {
 
   const handleOrderSubmit = async () => {
     if (!userId) {
-      alert("Вы должны войти в аккаунт для оформления заказа.");
+      setShowWarningNotification(true);
       return;
     }
 
@@ -60,24 +144,19 @@ const Checkout: React.FC = () => {
     const orderData = {
       orderItems: orderItems,
       totalPrice: totalPrice,
-      payment: "card",
+      payment: paymentMethod,
       status: "pending",
       userId: userId,
     };
 
     try {
       await createOrder(orderData).unwrap();
-      alert("Заказ успешно оформлен!");
+      setShowSuccessNotification(true);
       localStorage.removeItem("cart");
       setCart([]);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Ошибка при оформлении заказа:", error.message);
-        alert(`Ошибка при оформлении заказа: ${error.message}`);
-      } else {
-        console.error("Неизвестная ошибка при оформлении заказа:", error);
-        alert("Неизвестная ошибка при оформлении заказа.");
-      }
+      setShowErrorNotification(true);
+      console.error("Ошибка при оформлении заказа:", error);
     }
   };
 
@@ -95,83 +174,146 @@ const Checkout: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.checkoutPage}>
-        <Alert message="Ошибка при загрузке данных" type="error" showIcon />
+        <Alert
+          message="Ошибка при загрузке данных"
+          type="error"
+          showIcon
+          banner
+        />
       </div>
     );
   }
 
   return (
     <div className={styles.checkoutPage}>
-      <h1>Оформление заказа</h1>
+      {notificationContextHolder}
+
+      <div className={styles.header}>
+        <h1>Оформление заказа</h1>
+        <Divider />
+      </div>
+
       {cart.length === 0 ? (
         <div className={styles.emptyCart}>
-          <ShoppingCartOutlined />
-          <p>Ваша корзина пуста.</p>
+          <ShoppingCartOutlined className={styles.emptyCartIcon} />
+          <h3>Ваша корзина пуста</h3>
+          <p>Добавьте товары в корзину, чтобы продолжить</p>
+          <Button
+            type="primary"
+            className={styles.catalogButton}
+            onClick={() => (window.location.href = "/catalog")}>
+            Перейти в каталог
+          </Button>
         </div>
       ) : (
-        <>
-          <div className={styles.cartList}>
-            {cart.map((item) => {
-              const isImageEmpty =
-                item.image &&
-                typeof item.image === "object" &&
-                Object.keys(item.image).length === 0;
-              const imageSrc =
-                isImageEmpty || !item.image
-                  ? "/placeholder.jpg"
-                  : typeof item.image === "string"
-                  ? item.image
-                  : "/placeholder.jpg";
+        <div className={styles.checkoutContent}>
+          <div className={styles.cartSection}>
+            <Card title="Ваш заказ" className={styles.cartCard}>
+              <div className={styles.cartList}>
+                {cart.map((item) => {
+                  const isImageEmpty =
+                    item.image &&
+                    typeof item.image === "object" &&
+                    Object.keys(item.image).length === 0;
+                  const imageSrc =
+                    isImageEmpty || !item.image
+                      ? "/placeholder.jpg"
+                      : typeof item.image === "string"
+                      ? item.image
+                      : "/placeholder.jpg";
 
-              return (
-                <div key={item.id} className={styles.cartItem}>
-                  <img
-                    src={imageSrc}
-                    alt={item.name}
-                    onError={(e) => {
-                      e.currentTarget.src = "/placeholder.jpg";
-                      e.currentTarget.onerror = null;
-                    }}
-                  />
-                  <div className={styles.itemDetails}>
-                    <h3>{item.name}</h3>
-                    <p className={styles.price}>
-                      {item.price.toLocaleString()} ₽
-                    </p>
-                    <div className={styles.itemControls}>
-                      <input
-                        type="number"
-                        value={item.quantity}
-                        min="1"
-                        onChange={(e) =>
-                          updateQuantity(item.id, Number(e.target.value))
-                        }
+                  return (
+                    <div key={item.id} className={styles.cartItem}>
+                      <img
+                        src={imageSrc}
+                        alt={item.name}
+                        className={styles.cartItemImage}
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.jpg";
+                          e.currentTarget.onerror = null;
+                        }}
                       />
-                      <button onClick={() => removeFromCart(item.id)}>
-                        Удалить
-                      </button>
+                      <div className={styles.itemDetails}>
+                        <h3>{item.name}</h3>
+                        <p className={styles.price}>
+                          {item.price.toLocaleString()} ₽
+                        </p>
+                        <div className={styles.itemControls}>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            min="1"
+                            onChange={(e) =>
+                              updateQuantity(item.id, Number(e.target.value))
+                            }
+                            className={styles.quantityInput}
+                          />
+                          <Button
+                            danger
+                            onClick={() => removeFromCart(item.id)}
+                            className={styles.removeButton}>
+                            Удалить
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+
+          <div className={styles.paymentSection}>
+            <Card title="Способ оплаты" className={styles.paymentCard}>
+              <Radio.Group
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                value={paymentMethod}
+                className={styles.paymentMethods}>
+                {paymentMethods.map((method) => (
+                  <Radio
+                    key={method.value}
+                    value={method.value}
+                    className={styles.paymentMethod}>
+                    <div className={styles.paymentMethodContent}>
+                      <span className={styles.paymentIcon}>{method.icon}</span>
+                      <div>
+                        <div className={styles.paymentLabel}>
+                          {method.label}
+                        </div>
+                        <div className={styles.paymentDescription}>
+                          {method.description}
+                        </div>
+                      </div>
+                    </div>
+                  </Radio>
+                ))}
+              </Radio.Group>
+            </Card>
+
+            <Card className={styles.summaryCard}>
+              <div className={styles.orderSummary}>
+                <div className={styles.summaryRow}>
+                  <span>Товары {cart.length} шт. </span>
                 </div>
-              );
-            })}
+                <Divider className={styles.summaryDivider} />
+                <div className={`${styles.summaryRow} ${styles.totalRow}`}>
+                  <span>Итого: </span>
+                  <span>{totalPrice.toLocaleString()} ₽</span>
+                </div>
+                <Divider className={styles.summaryDivider} />
+                <Button
+                  type="primary"
+                  size="large"
+                  className={styles.checkoutButton}
+                  onClick={handleOrderSubmit}
+                  loading={isLoading}
+                  block>
+                  Оформить заказ
+                </Button>
+              </div>
+            </Card>
           </div>
-          <div className={styles.orderSummary}>
-            <div className={styles.totalPrice}>
-              <span>Итого:</span>
-              <span>{totalPrice.toLocaleString()} ₽</span>
-            </div>
-            <button
-              className={styles.checkoutButton}
-              onClick={handleOrderSubmit}
-              disabled={isLoading}>
-              {isLoading ? "Оформляем..." : "Оформить заказ"}
-            </button>
-            {isError && (
-              <p className={styles.error}>Ошибка при оформлении заказа.</p>
-            )}
-          </div>
-        </>
+        </div>
       )}
     </div>
   );

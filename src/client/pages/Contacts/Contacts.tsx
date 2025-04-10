@@ -4,11 +4,10 @@ import {
   PhoneOutlined, 
   EnvironmentOutlined, 
   ClockCircleOutlined,
-  FacebookOutlined,
   InstagramOutlined,
-  TwitterOutlined
 } from '@ant-design/icons';
 import styles from './Contacts.module.scss';
+import { FaTelegramPlane } from 'react-icons/fa';
 
 const Contacts: React.FC = () => {
   return (
@@ -81,9 +80,8 @@ const Contacts: React.FC = () => {
       <div className={styles.socialSection}>
         <h2>Мы в социальных сетях</h2>
         <div className={styles.socialIcons}>
-          <a href="#"><FacebookOutlined className={styles.socialIcon} /></a>
           <a href="#"><InstagramOutlined className={styles.socialIcon} /></a>
-          <a href="#"><TwitterOutlined className={styles.socialIcon} /></a>
+          <a href="#"><FaTelegramPlane className={styles.socialIcon} /></a>
         </div>
       </div>
     </div>

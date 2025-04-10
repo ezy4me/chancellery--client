@@ -1,7 +1,6 @@
-import { Spin, Alert, Tag, Badge, Input, Select, Pagination, Empty } from "antd";
+import { Spin, Alert, Tag, Badge, Input, Select, Pagination, Empty, notification } from "antd";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { FaHeart, FaRegHeart, FaShoppingCart, FaInfoCircle, FaSearch } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaShoppingCart, FaSearch } from "react-icons/fa";
 import { GiCardboardBox } from "react-icons/gi";
 import styles from "./Catalog.module.scss";
 import { useGetProductsQuery } from "../../../api/ProductAPI";
@@ -17,6 +16,7 @@ const { Search } = Input;
 const { Option } = Select;
 
 const Catalog: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
   const { data: productsData, error, isLoading } = useGetProductsQuery();
   const userId = useSelector((state: RootState) => state.auth.user?.id);
   const { data: wishlist, refetch } = useGetWishlistQuery(userId!, {
@@ -67,14 +67,26 @@ const Catalog: React.FC = () => {
 
   const handleWishlistToggle = async (productId: number) => {
     if (!userId) {
-      alert("Войдите в аккаунт, чтобы добавить в избранное.");
+      api.warning({
+        message: 'Требуется авторизация',
+        description: 'Войдите в аккаунт, чтобы добавить в избранное',
+        placement: 'topRight',
+      });
       return;
     }
 
     if (isInWishlist(productId)) {
       await removeFromWishlist({ userId, productId });
+      api.success({
+        message: 'Удалено из избранного',
+        placement: 'topRight',
+      });
     } else {
       await addToWishlist({ userId, productId });
+      api.success({
+        message: 'Добавлено в избранное',
+        placement: 'topRight',
+      });
     }
 
     await refetch();
@@ -91,7 +103,12 @@ const Catalog: React.FC = () => {
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert("Товар добавлен в корзину!");
+    
+    api.success({
+      message: 'Товар добавлен в корзину',
+      description: `${product.name} успешно добавлен в вашу корзину`,
+      placement: 'topRight',
+    });
   };
 
   const handlePageChange = (page: number, size: number) => {
@@ -113,13 +130,21 @@ const Catalog: React.FC = () => {
   if (error) {
     return (
       <div className={styles.catalogPage}>
-        <Alert message="Ошибка загрузки данных" type="error" showIcon />
+        <Alert 
+          message="Ошибка загрузки данных" 
+          type="error" 
+          showIcon 
+          banner
+          closable
+        />
       </div>
     );
   }
 
   return (
     <div className={styles.catalogPage}>
+      {contextHolder}
+      
       <div className={styles.header}>
         <h1 className={styles.title}>Каталог продукции</h1>
         <p className={styles.subtitle}>Широкий ассортимент печатной продукции для вашего бизнеса</p>
@@ -163,9 +188,13 @@ const Catalog: React.FC = () => {
         <div className={styles.emptyState}>
           <Empty
             description={
-              searchTerm || selectedCategory
-                ? "Ничего не найдено по вашему запросу"
-                : "Каталог пуст"
+              <Alert
+                message={searchTerm || selectedCategory 
+                  ? "Ничего не найдено по вашему запросу" 
+                  : "Каталог пуст"}
+                type="info"
+                showIcon
+              />
             }
           />
         </div>
@@ -219,12 +248,6 @@ const Catalog: React.FC = () => {
                   <div className={styles.priceRow}>
                     <div className={styles.catalogPrice}>{product.price} ₽</div>
                     <div className={styles.actions}>
-                      <Link
-                        to={`/product/${product.id}`}
-                        className={styles.detailsButton}
-                      >
-                        <FaInfoCircle /> Подробнее
-                      </Link>
                       <button
                         className={styles.orderButton}
                         onClick={() => addToCart(product)}
@@ -238,7 +261,6 @@ const Catalog: React.FC = () => {
             ))}
           </div>
 
-          {/* Пагинация */}
           <div className={styles.pagination}>
             <Pagination
               current={currentPage}

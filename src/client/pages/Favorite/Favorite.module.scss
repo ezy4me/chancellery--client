@@ -228,3 +228,26 @@
     text-align: center;
   }
 }
+
+.addToCartButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: $secondary-color;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+  
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+  
+  .cartIcon {
+    font-size: 16px;
+  }

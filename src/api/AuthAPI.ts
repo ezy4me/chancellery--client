@@ -21,9 +21,10 @@ interface LoginResponse {
 
 interface RegisterRequest {
   email: string;
-  password: string;
+  passwordHash: string;
   passwordRepeat: string;
   role: string;
+  phone: string;
 }
 
 export const authApi = api.injectEndpoints({

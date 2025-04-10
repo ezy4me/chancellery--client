@@ -1,7 +1,8 @@
-import { Spin, Alert } from "antd";
+import { Spin, Alert, Tag, Badge } from "antd";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaShoppingCart, FaInfoCircle } from "react-icons/fa";
+import { GiCardboardBox } from "react-icons/gi";
 import styles from "./Catalog.module.scss";
 import { useGetProductsQuery } from "../../../api/ProductAPI";
 import {
@@ -42,7 +43,7 @@ const Catalog: React.FC = () => {
   if (error) {
     return (
       <div className={styles.catalogPage}>
-        <Alert message="Ошибка загрузки данных" type="error" showIcon />;
+        <Alert message="Ошибка загрузки данных" type="error" showIcon />
       </div>
     );
   }
@@ -82,39 +83,66 @@ const Catalog: React.FC = () => {
 
   return (
     <div className={styles.catalogPage}>
-      <h1 className={styles.title}>Каталог товаров</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Каталог продукции</h1>
+        <p className={styles.subtitle}>Широкий ассортимент печатной продукции для вашего бизнеса</p>
+      </div>
+      
       <div className={styles.catalogGrid}>
         {products?.map((product) => (
           <div key={product.id} className={styles.catalogItem}>
-            <img
-              src={product.image || "/public/placeholder.jpg"}
-              alt={product.name}
-              className={styles.catalogImage}
-              onError={(e) => (e.currentTarget.src = "/public/placeholder.jpg")}
-            />
-            <div className={styles.catalogInfo}>
-              <h3 className={styles.catalogName}>{product.name}</h3>
-              <p className={styles.catalogDescription}>{product.description}</p>
-              <div className={styles.catalogPrice}>{product.price} ₽</div>
-              <Link
-                to={`/product/${product.id}`}
-                className={styles.catalogLink}>
-                Подробнее
-              </Link>
+            <div className={styles.imageContainer}>
+              <img
+                src={"/placeholder.jpg"}
+                alt={product.name}
+                className={styles.catalogImage}
+                onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+              />
+              <div className={styles.categoryTag}>
+                <Tag color="#3498db">{product.category.name}</Tag>
+              </div>
               <button
-                className={styles.orderButton}
-                onClick={() => addToCart(product)}>
-                Заказать
-              </button>
-              <button
-                className={styles.wishlistButton}
+                className={`${styles.wishlistButton} ${isInWishlist(product.id) ? styles.active : ''}`}
                 onClick={() => handleWishlistToggle(product.id)}>
                 {isInWishlist(product.id) ? (
-                  <FaHeart className={styles.heartIconFilled} />
+                  <FaHeart className={styles.heartIcon} />
                 ) : (
                   <FaRegHeart className={styles.heartIcon} />
                 )}
               </button>
+            </div>
+
+            <div className={styles.catalogInfo}>
+              <div className={styles.productHeader}>
+                <h3 className={styles.catalogName}>{product.name}</h3>
+                <Badge 
+                  count={`${product.quantity} шт`} 
+                  style={{ backgroundColor: '#2ecc71' }} 
+                />
+              </div>
+              
+              <p className={styles.catalogDescription}>{product.description}</p>
+              
+              <div className={styles.supplierInfo}>
+                <GiCardboardBox className={styles.supplierIcon} />
+                <span>{product.supplier.name}</span>
+              </div>
+
+              <div className={styles.priceRow}>
+                <div className={styles.catalogPrice}>{product.price} ₽</div>
+                <div className={styles.actions}>
+                  <Link
+                    to={`/product/${product.id}`}
+                    className={styles.detailsButton}>
+                    <FaInfoCircle /> Подробнее
+                  </Link>
+                  <button
+                    className={styles.orderButton}
+                    onClick={() => addToCart(product)}>
+                    <FaShoppingCart />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ))}

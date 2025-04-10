@@ -4,13 +4,14 @@ import { useSelector } from "react-redux";
 import styles from "./Checkout.module.scss";
 import { RootState } from "../../../store";
 import { useCreateOrderMutation } from "../../../api/OrderAPI";
+import { ShoppingCartOutlined } from "@ant-design/icons";
 
 interface CartItem {
   id: number;
   name: string;
   price: number;
   quantity: number;
-  image?: {};
+  image?: string | {};
 }
 
 const Checkout: React.FC = () => {
@@ -80,7 +81,6 @@ const Checkout: React.FC = () => {
     }
   };
 
-  // Загрузка или ошибка
   if (isLoading) {
     return (
       <div className={styles.checkoutPage}>
@@ -104,52 +104,73 @@ const Checkout: React.FC = () => {
     <div className={styles.checkoutPage}>
       <h1>Оформление заказа</h1>
       {cart.length === 0 ? (
-        <p>Ваша корзина пуста.</p>
+        <div className={styles.emptyCart}>
+          <ShoppingCartOutlined />
+          <p>Ваша корзина пуста.</p>
+        </div>
       ) : (
         <>
           <div className={styles.cartList}>
             {cart.map((item) => {
               const isImageEmpty =
-                item.image && Object.keys(item.image).length === 0;
+                item.image &&
+                typeof item.image === "object" &&
+                Object.keys(item.image).length === 0;
+              const imageSrc =
+                isImageEmpty || !item.image
+                  ? "/placeholder.jpg"
+                  : typeof item.image === "string"
+                  ? item.image
+                  : "/placeholder.jpg";
+
               return (
                 <div key={item.id} className={styles.cartItem}>
                   <img
-                    src={
-                      isImageEmpty
-                        ? "/public/placeholder.jpg"
-                        : (item.image as string)
-                    }
+                    src={imageSrc}
                     alt={item.name}
-                    onError={(e) =>
-                      (e.currentTarget.src = "/public/placeholder.jpg")
-                    }
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder.jpg";
+                      e.currentTarget.onerror = null;
+                    }}
                   />
-                  <div>
+                  <div className={styles.itemDetails}>
                     <h3>{item.name}</h3>
-                    <p>{item.price} ₽</p>
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min="1"
-                      onChange={(e) =>
-                        updateQuantity(item.id, Number(e.target.value))
-                      }
-                    />
-                    <button onClick={() => removeFromCart(item.id)}>
-                      Удалить
-                    </button>
+                    <p className={styles.price}>
+                      {item.price.toLocaleString()} ₽
+                    </p>
+                    <div className={styles.itemControls}>
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        min="1"
+                        onChange={(e) =>
+                          updateQuantity(item.id, Number(e.target.value))
+                        }
+                      />
+                      <button onClick={() => removeFromCart(item.id)}>
+                        Удалить
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <h2>Итого: {totalPrice} ₽</h2>
-          <button onClick={handleOrderSubmit} disabled={isLoading}>
-            {isLoading ? "Оформляем..." : "Оформить заказ"}
-          </button>
-          {isError && (
-            <p className={styles.error}>Ошибка при оформлении заказа.</p>
-          )}
+          <div className={styles.orderSummary}>
+            <div className={styles.totalPrice}>
+              <span>Итого:</span>
+              <span>{totalPrice.toLocaleString()} ₽</span>
+            </div>
+            <button
+              className={styles.checkoutButton}
+              onClick={handleOrderSubmit}
+              disabled={isLoading}>
+              {isLoading ? "Оформляем..." : "Оформить заказ"}
+            </button>
+            {isError && (
+              <p className={styles.error}>Ошибка при оформлении заказа.</p>
+            )}
+          </div>
         </>
       )}
     </div>

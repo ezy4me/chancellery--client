@@ -6,6 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import Favorites from "../client/pages/Favorite/Favorite";
+import Contacts from "../client/pages/Contacts/Contacts";
 
 const Home = lazy(() => import("../client/pages/Home/Home"));
 const Catalog = lazy(() => import("../client/pages/Catalog/Catalog"));
@@ -36,6 +37,7 @@ const AppRouter = () => {
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/contacts" element={<Contacts />} />
         </Route>
 
         <Route path="/auth" element={<AuthLayout />}>

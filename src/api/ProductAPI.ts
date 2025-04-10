@@ -1,14 +1,30 @@
 import { api } from "./index";
 
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface Supplier {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+}
+
 interface Product {
   id: number;
   name: string;
   description: string;
-  price: number;
-  image: any;
+  price: string; 
+  imageId: number | null; 
   quantity: number;
   categoryId: number;
   supplierId: number;
+  createdAt: string; 
+  category: Category; 
+  supplier: Supplier; 
 }
 
 export const productApi = api.injectEndpoints({

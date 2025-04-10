@@ -1,7 +1,8 @@
-import { Spin, Alert } from "antd";
+import { Spin, Alert, Empty } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaHeart } from "react-icons/fa";
+import { GiShoppingBag } from "react-icons/gi";
 import styles from "./Favorite.module.scss";
 import {
   useGetWishlistQuery,
@@ -26,7 +27,16 @@ const Favorites: React.FC = () => {
   if (!userId) {
     return (
       <div className={styles.favoritesPage}>
-        <div className={styles.message}>Пожалуйста, войдите в аккаунт.</div>
+        <div className={styles.authMessage}>
+          <div className={styles.authContent}>
+            <FaHeart className={styles.authIcon} />
+            <h3>Ваш список избранного</h3>
+            <p>Войдите в аккаунт, чтобы просматривать избранные товары</p>
+            <Link to="/auth/login" className={styles.authButton}>
+              Войти
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -53,9 +63,18 @@ const Favorites: React.FC = () => {
   if (!wishlist || wishlist.length === 0) {
     return (
       <div className={styles.favoritesPage}>
-        <div className={styles.message}>
-          Вы пока ничего не добавили в избранное.
-        </div>
+        <Empty
+          image={<GiShoppingBag className={styles.emptyIcon} />}
+          description={
+            <div className={styles.emptyMessage}>
+              <h3>Ваш список избранного пуст</h3>
+              <p>Добавляйте понравившиеся товары, чтобы не потерять их</p>
+              <Link to="/catalog" className={styles.emptyButton}>
+                Перейти в каталог
+              </Link>
+            </div>
+          }
+        />
       </div>
     );
   }
@@ -67,34 +86,51 @@ const Favorites: React.FC = () => {
 
   return (
     <div className={styles.favoritesPage}>
-      <h1 className={styles.title}>Избранные товары</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>
+          <FaHeart className={styles.titleIcon} /> Избранное
+        </h1>
+        <p className={styles.subtitle}>
+          {wishlist.length} {wishlist.length === 1 ? "товар" : "товаров"} в вашем списке
+        </p>
+      </div>
+
       <div className={styles.favoritesGrid}>
         {wishlist.map((item) => (
           <div key={item.product.id} className={styles.favoritesItem}>
-            <img
-              src={item.product.image || "/public/placeholder.jpg"}
-              alt={item.product.name}
-              className={styles.favoritesImage}
-              onError={(e) => (e.currentTarget.src = "/public/placeholder.jpg")}
-            />
+            <div className={styles.imageContainer}>
+              <img
+                src={item.product.image || "/placeholder.jpg"}
+                alt={item.product.name}
+                className={styles.favoritesImage}
+                onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+              />
+              <button
+                className={styles.removeButton}
+                onClick={() => handleRemove(item.product.id)}
+                aria-label="Удалить из избранного"
+              >
+                <FaTrash className={styles.trashIcon} />
+              </button>
+            </div>
+
             <div className={styles.favoritesInfo}>
               <h3 className={styles.favoritesName}>{item.product.name}</h3>
               <p className={styles.favoritesDescription}>
                 {item.product.description}
               </p>
-              <div className={styles.favoritesPrice}>
-                {item.product.price} ₽
+              
+              <div className={styles.bottomRow}>
+                <div className={styles.favoritesPrice}>
+                  {item.product.price} ₽
+                </div>
+                <Link
+                  to={`/product/${item.product.id}`}
+                  className={styles.favoritesLink}
+                >
+                  Подробнее
+                </Link>
               </div>
-              <Link
-                to={`/product/${item.product.id}`}
-                className={styles.favoritesLink}>
-                Подробнее
-              </Link>
-              <button
-                className={styles.removeButton}
-                onClick={() => handleRemove(item.product.id)}>
-                <FaTrash className={styles.trashIcon} /> Удалить
-              </button>
             </div>
           </div>
         ))}

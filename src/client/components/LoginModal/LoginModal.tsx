@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { FaUser, FaLock, FaTimes, FaSpinner } from "react-icons/fa";
+import { FaUser, FaLock, FaTimes, FaSpinner, FaPhone } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation, useRegisterMutation } from "../../../api/AuthAPI";
@@ -19,6 +19,7 @@ interface FormData {
   email: string;
   password: string;
   passwordRepeat?: string;
+  phone?: string; 
 }
 
 const loginSchema = yup.object().shape({
@@ -39,6 +40,10 @@ const registerSchema = yup.object().shape({
     .string()
     .oneOf([yup.ref("password")], "Пароли должны совпадать")
     .required("Повторите пароль"),
+  phone: yup
+    .string()
+    .matches(/^\+7\d{10}$/, "Телефон должен быть в формате +7XXXXXXXXXX")
+    .required("Введите номер телефона"),
 });
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
@@ -48,12 +53,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
 
+  const schema = isLogin ? loginSchema : registerSchema;
   const {
     handleSubmit,
     register: formRegister,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(isLogin ? loginSchema : registerSchema),
+    resolver: yupResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
@@ -81,12 +87,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             : "/auth/profile"
         );
       } else {
-        await register({
-          email: data.email,
-          password: data.password,
-          passwordRepeat: data.passwordRepeat!,
-          role: "USER",
-        }).unwrap();
+          await register({
+            email: data.email,
+            passwordHash: data.password,
+            passwordRepeat: data.passwordRepeat!,
+            role: "USER",
+            phone: data.phone!,
+          }).unwrap();
         setIsLogin(true);
       }
 
@@ -150,28 +157,51 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {!isLogin && (
-            <div className={styles["modal__field"]}>
-              <label
-                className={styles["modal__label"]}
-                htmlFor="passwordRepeat">
-                Повторите пароль
-              </label>
-              <div className={styles["modal__input-wrapper"]}>
-                <FaLock className={styles["modal__icon"]} />
-                <input
-                  type="password"
-                  {...formRegister("passwordRepeat")}
-                  className={styles["modal__input"]}
-                  placeholder="Повторите пароль"
-                  autoComplete="new-password"
-                />
+            <>
+              <div className={styles["modal__field"]}>
+                <label className={styles["modal__label"]} htmlFor="phone">
+                  Телефон
+                </label>
+                <div className={styles["modal__input-wrapper"]}>
+                  <FaPhone className={styles["modal__icon"]} />
+                  <input
+                    type="text"
+                    {...formRegister("phone")}
+                    className={styles["modal__input"]}
+                    placeholder="Введите номер телефона"
+                    autoComplete="tel"
+                  />
+                </div>
+                {errors.phone && (
+                  <p className={styles["modal__error"]}>
+                    {errors.phone.message}
+                  </p>
+                )}
               </div>
-              {errors.passwordRepeat && (
-                <p className={styles["modal__error"]}>
-                  {errors.passwordRepeat.message}
-                </p>
-              )}
-            </div>
+
+              <div className={styles["modal__field"]}>
+                <label
+                  className={styles["modal__label"]}
+                  htmlFor="passwordRepeat">
+                  Повторите пароль
+                </label>
+                <div className={styles["modal__input-wrapper"]}>
+                  <FaLock className={styles["modal__icon"]} />
+                  <input
+                    type="password"
+                    {...formRegister("passwordRepeat")}
+                    className={styles["modal__input"]}
+                    placeholder="Повторите пароль"
+                    autoComplete="new-password"
+                  />
+                </div>
+                {errors.passwordRepeat && (
+                  <p className={styles["modal__error"]}>
+                    {errors.passwordRepeat.message}
+                  </p>
+                )}
+              </div>
+            </>
           )}
 
           <button

@@ -2,140 +2,259 @@
 @use "sass:color";
 
 .profilePage {
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    border-radius: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 30px 20px;
+    min-height: 100vh;
 }
 
-h1 {
+.profileHeader {
     text-align: center;
-    color: $primary-color;
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
+    position: relative;
 }
 
-.profileInfo {
-    background-color: #fafafa;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.profileInfo h2 {
-    color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.profileInfo p {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 10px;
-}
-
-.ordersSection {
-    margin-top: 30px;
-}
-
-.ordersList {
+.userAvatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: rgba($primary-color, 0.1);
     display: flex;
-    flex-direction: column;
-    list-style: none;
-    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed $border-color;
+    background: #ffffff;
+}
+
+.title {
+    font-size: 2.2rem;
+    color: $dark-gray;
     margin: 0;
-    gap: 15px;
+    font-weight: 600;
 }
 
-.orderItem {
-    background-color: #fafafa;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
+.profileContent {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+
+    @media (min-width: 992px) {
+        grid-template-columns: 350px 1fr;
+    }
 }
 
-.orderItem:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.infoCard {
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px dashed $border-color;
+    height: fit-content;
+    height: auto;
+    font-size: 1em;
+
+    .ant-card-head {
+        border-bottom: 1px dashed $border-color;
+    }
 }
 
-.orderItem h3 {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    color: $primary-color;
+.infoItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
 }
 
-.orderItem p {
-    margin-bottom: 8px;
-    font-size: 1rem;
-    color: #555;
+.infoIcon {
+    margin-right: 15px;
+    font-size: 1.3rem;
 }
 
-.orderItem .orderStatus {
-    font-weight: bold;
-}
-
-.loading,
-.error {
-    font-size: 1rem;
-    color: #d9534f;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.noOrders {
-    font-size: 1rem;
-    text-align: center;
-    color: #6c757d;
+.infoText {
+    color: $text-color;
 }
 
 .logoutButton {
-    padding: 12px 20px;
-    background-color: $primary-color;
-    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    margin-top: 30px;
+    background: rgba($danger-color, 0.1);
+    color: $danger-color;
     border: none;
-    border-radius: 6px;
-    font-weight: bold;
+    border-radius: 8px;
+    font-weight: 500;
     cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 
     &:hover {
-        background-color: color.adjust($primary-color, $lightness: -10%);
+        background: rgba($danger-color, 0.2);
     }
+}
+
+.logoutButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba($danger-color, 0.1);
+    color: $danger-color;
+    border: none;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 0;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba($danger-color, 0.2);
+    }
+
+    .logoutIcon {
+        margin-left: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover .logoutIcon {
+        transform: translateX(-5px);
+    }
+}
+
+.logoutIcon {
+    margin-right: 8px;
+}
+
+.ordersSection {
+    width: 100%;
+}
+
+.ordersTitle {
+    font-size: 1.8rem;
+    color: $dark-gray;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+}
+
+.titleIcon {
+    margin-right: 12px;
+}
+
+.ordersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.orderCard {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px dashed $border-color;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.orderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.orderDetails {
+    margin: 20px 0;
+}
+
+.detailItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: $text-secondary;
+}
+
+.detailIcon {
+    margin-right: 10px;
+}
+
+.detailsButton {
+    width: 100%;
+    padding: 10px;
+    background: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba($secondary-color, 0.2);
+    }
+}
+
+.errorContainer {
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+.errorCard,
+.emptyCard {
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    font-size: 1.5em;
+    border: 1px dashed $border-color;
+}
+
+.loginButton,
+.catalogButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: $secondary-color;
+    color: white;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba($secondary-color, 0.3);
+    border: 0;
+
+    &:hover {
+        background: $secondary-hover;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba($secondary-color, 0.4);
+    }
+
+    .arrowIcon {
+        margin-left: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover .arrowIcon {
+        transform: translateX(5px);
+    }
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    padding: 50px 0;
 }
 
 @media (max-width: 768px) {
     .profilePage {
-        padding: 15px;
+        padding: 20px 15px;
     }
 
-    h1 {
-        font-size: 2rem;
+    .title {
+        font-size: 1.8rem;
     }
 
-    .profileInfo {
-        padding: 15px;
-    }
-
-    .orderItem {
-        padding: 15px;
-    }
-
-    .orderItem h3 {
-        font-size: 1.1rem;
-    }
-
-    .ordersList {
-        gap: 10px;
+    .ordersGrid {
+        grid-template-columns: 1fr;
     }
 }

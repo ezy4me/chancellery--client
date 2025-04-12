@@ -51,9 +51,6 @@ const Favorites: React.FC = () => {
             <FaHeart className={styles.authIcon} />
             <h3>Ваш список избранного</h3>
             <p>Войдите в аккаунт, чтобы просматривать избранные товары</p>
-            <Link to="/auth/login" className={styles.authButton}>
-              Войти
-            </Link>
           </div>
         </div>
       </div>

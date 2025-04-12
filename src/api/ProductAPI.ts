@@ -25,6 +25,7 @@ interface Product {
   createdAt: string;
   category: Category;
   supplier: Supplier;
+  imageUrl?: string;
 }
 
 export const productApi = api.injectEndpoints({

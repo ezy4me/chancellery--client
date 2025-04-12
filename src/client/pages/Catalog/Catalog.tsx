@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart, FaShoppingCart, FaSearch } from "react-icons/fa";
 import { GiCardboardBox } from "react-icons/gi";
 import styles from "./Catalog.module.scss";
-import { useGetProductsQuery } from "../../../api/ProductAPI";
+import { useGetProductsQuery, useGetProductImageQuery } from "../../../api/ProductAPI";
 import {
   useGetWishlistQuery,
   useAddToWishlistMutation,
@@ -14,6 +14,66 @@ import { RootState } from "../../../store";
 
 const { Search } = Input;
 const { Option } = Select;
+
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface Supplier {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  imageId: number | null;
+  quantity: number;
+  categoryId: number;
+  supplierId: number;
+  createdAt: string;
+  category: Category;
+  supplier: Supplier;
+}
+
+interface ProductImageProps {
+  productId: number;
+  hasImage: boolean;
+  alt: string;
+  className?: string;
+}
+
+const ProductImage: React.FC<ProductImageProps> = ({ productId, hasImage, alt, className }) => {
+  const [imageUrl, setImageUrl] = useState<string>('/placeholder.jpg');
+  const { data: imageBlob } = useGetProductImageQuery(productId, {
+    skip: !hasImage
+  });
+
+  useEffect(() => {
+    if (imageBlob) {
+      const url = URL.createObjectURL(imageBlob);
+      setImageUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [imageBlob]);
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className={className}
+      onError={(e) => {
+        e.currentTarget.src = '/placeholder.jpg';
+      }}
+    />
+  );
+};
 
 const Catalog: React.FC = () => {
   const [api, contextHolder] = notification.useNotification();
@@ -26,7 +86,6 @@ const Catalog: React.FC = () => {
   const [addToWishlist] = useAddToWishlistMutation();
   const [removeFromWishlist] = useRemoveFromWishlistMutation();
 
-  // Состояния для фильтрации и пагинации
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,12 +97,10 @@ const Catalog: React.FC = () => {
     }
   }, [error]);
 
-  // Получаем все уникальные категории
   const categories = Array.from(
     new Set(productsData?.map((product) => product.category.name))
   );
 
-  // Функция фильтрации продуктов
   const filteredProducts = productsData
     ?.filter((product) => {
       const matchesSearch = product.name
@@ -55,7 +112,6 @@ const Catalog: React.FC = () => {
       return matchesSearch && matchesCategory;
     }) || [];
 
-  // Пагинация
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -92,7 +148,7 @@ const Catalog: React.FC = () => {
     await refetch();
   };
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: Product) => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const existingProduct = cart.find((item: any) => item.id === product.id);
 
@@ -150,7 +206,6 @@ const Catalog: React.FC = () => {
         <p className={styles.subtitle}>Широкий ассортимент печатной продукции для вашего бизнеса</p>
       </div>
 
-      {/* Панель поиска и фильтров */}
       <div className={styles.filterPanel}>
         <Search
           placeholder="Поиск по названию"
@@ -204,11 +259,11 @@ const Catalog: React.FC = () => {
             {paginatedProducts.map((product) => (
               <div key={product.id} className={styles.catalogItem}>
                 <div className={styles.imageContainer}>
-                  <img
-                    src={"/placeholder.jpg"}
+                  <ProductImage 
+                    productId={product.id}
+                    hasImage={product.imageId !== null}
                     alt={product.name}
                     className={styles.catalogImage}
-                    onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
                   />
                   <div className={styles.categoryTag}>
                     <Tag color="#3498db">{product.category.name}</Tag>

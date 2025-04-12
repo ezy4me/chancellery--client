@@ -28,7 +28,7 @@ const AdminLayout: React.FC = () => {
     {
       key: "dashboard",
       icon: <DashboardOutlined />,
-      label: <Link to="/admin">Dashboard</Link>,
+      label: <Link to="/admin">Статистика</Link>,
     },
     {
       key: "products",

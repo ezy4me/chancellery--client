@@ -1,4 +1,4 @@
-import { Spin, Alert, Radio, Card, Button, Divider, notification } from "antd";
+import { Spin, Alert, Radio, Card, Button, Divider, notification, InputNumber } from "antd";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./Checkout.module.scss";
@@ -19,6 +19,8 @@ interface CartItem {
   quantity: number;
   image?: string | {};
 }
+
+const MAX_QUANTITY = 50; // Максимальное количество одного товара
 
 const paymentMethods = [
   {
@@ -51,6 +53,7 @@ const Checkout: React.FC = () => {
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [showWarningNotification, setShowWarningNotification] = useState(false);
+  const [showMaxQuantityNotification, setShowMaxQuantityNotification] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -108,10 +111,27 @@ const Checkout: React.FC = () => {
     }
   }, [showWarningNotification]);
 
+  useEffect(() => {
+    if (showMaxQuantityNotification) {
+      notificationApi.warning({
+        message: "Максимальное количество",
+        description: `Вы можете заказать не более ${MAX_QUANTITY} единиц одного товара`,
+        placement: "topRight",
+        duration: 3,
+      });
+      setShowMaxQuantityNotification(false);
+    }
+  }, [showMaxQuantityNotification]);
+
   const updateQuantity = (productId: number, quantity: number) => {
+    if (quantity > MAX_QUANTITY) {
+      setShowMaxQuantityNotification(true);
+      quantity = MAX_QUANTITY;
+    }
+
     const updatedCart = cart.map((item) =>
       item.id === productId
-        ? { ...item, quantity: Math.max(1, quantity) }
+        ? { ...item, quantity: Math.max(1, Math.min(quantity, MAX_QUANTITY)) }
         : item
     );
     setCart(updatedCart);
@@ -239,13 +259,11 @@ const Checkout: React.FC = () => {
                           {item.price.toLocaleString()} ₽
                         </p>
                         <div className={styles.itemControls}>
-                          <input
-                            type="number"
+                          <InputNumber
+                            min={1}
+                            max={MAX_QUANTITY}
                             value={item.quantity}
-                            min="1"
-                            onChange={(e) =>
-                              updateQuantity(item.id, Number(e.target.value))
-                            }
+                            onChange={(value) => updateQuantity(item.id, Number(value))}
                             className={styles.quantityInput}
                           />
                           <Button
@@ -255,6 +273,11 @@ const Checkout: React.FC = () => {
                             Удалить
                           </Button>
                         </div>
+                        {item.quantity === MAX_QUANTITY && (
+                          <div className={styles.maxQuantityWarning}>
+                            Максимальное количество: {MAX_QUANTITY} шт.
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

@@ -10,6 +10,7 @@ import {
   Modal,
   Form,
   Input,
+  Tag,
 } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
@@ -18,6 +19,14 @@ import {
   useGetSuppliersQuery,
   useUpdateSupplierMutation,
 } from "../../api/SupplierAPI";
+import Title from "antd/es/typography/Title";
+
+interface Supplier {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+}
 
 const SuppliersDashboard: React.FC = () => {
   const {
@@ -31,20 +40,21 @@ const SuppliersDashboard: React.FC = () => {
   const [deleteSupplier] = useDeleteSupplierMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<any>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [form] = Form.useForm();
 
   const handleDelete = async (id: number) => {
     try {
       await deleteSupplier(id).unwrap();
-      message.success("Поставщик удален!");
+      message.success("Поставщик успешно удален");
       refetch();
-    } catch (error: any) {
-      message.error(`Ошибка при удалении: ${error.message}`);
+    } catch (error) {
+      message.error("Ошибка при удалении поставщика");
+      console.error(error);
     }
   };
 
-  const handleEdit = (supplier: any) => {
+  const handleEdit = (supplier: Supplier) => {
     setEditingSupplier(supplier);
     form.setFieldsValue(supplier);
     setIsModalOpen(true);
@@ -56,19 +66,20 @@ const SuppliersDashboard: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: Omit<Supplier, "id">) => {
     try {
       if (editingSupplier) {
         await updateSupplier({ id: editingSupplier.id, ...values }).unwrap();
-        message.success("Поставщик обновлен!");
+        message.success("Поставщик успешно обновлен");
       } else {
         await createSupplier(values).unwrap();
-        message.success("Поставщик создан!");
+        message.success("Поставщик успешно создан");
       }
       setIsModalOpen(false);
       refetch();
-    } catch (error: any) {
-      message.error(`Ошибка: ${error.message}`);
+    } catch (error) {
+      message.error("Ошибка при сохранении поставщика");
+      console.error(error);
     }
   };
 
@@ -77,16 +88,20 @@ const SuppliersDashboard: React.FC = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      width: 80,
+      sorter: (a: Supplier, b: Supplier) => a.id - b.id,
     },
     {
       title: "Название",
       dataIndex: "name",
       key: "name",
+      render: (name: string) => <Tag color="blue">{name}</Tag>,
     },
     {
       title: "Адрес",
       dataIndex: "address",
       key: "address",
+      ellipsis: true,
     },
     {
       title: "Телефон",
@@ -96,8 +111,9 @@ const SuppliersDashboard: React.FC = () => {
     {
       title: "Действия",
       key: "actions",
-      render: (_: any, record: any) => (
-        <Space>
+      width: 120,
+      render: (_: unknown, record: Supplier) => (
+        <Space size="small">
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm
             title="Удалить поставщика?"
@@ -125,20 +141,29 @@ const SuppliersDashboard: React.FC = () => {
   }
 
   return (
-    <div>
-      <h1>Управление поставщиками</h1>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={handleCreate}
-        style={{ marginBottom: 16 }}>
-        Добавить поставщика
-      </Button>
+    <div style={{ padding: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}>
+        <Title level={2} style={{ marginBottom: 16 }}>
+          Управление поставщиками
+        </Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+          Добавить поставщика
+        </Button>
+      </div>
+
       <Table
         dataSource={suppliers}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
+        scroll={{ x: true }}
+        bordered
+        pagination={{ pageSize: 10, showSizeChanger: true }}
       />
 
       <Modal
@@ -147,25 +172,40 @@ const SuppliersDashboard: React.FC = () => {
         }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
-        onOk={() => form.submit()}>
+        onOk={() => form.submit()}
+        okText="Сохранить"
+        cancelText="Отмена"
+        destroyOnClose>
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
             name="name"
-            label="Название"
-            rules={[{ required: true, message: "Введите название" }]}>
-            <Input />
+            label="Название компании"
+            rules={[
+              { required: true, message: "Введите название компании" },
+              { max: 100, message: "Максимум 100 символов" },
+            ]}>
+            <Input placeholder="Введите название компании" />
           </Form.Item>
           <Form.Item
             name="address"
-            label="Адрес"
-            rules={[{ required: true, message: "Введите адрес" }]}>
-            <Input />
+            label="Юридический адрес"
+            rules={[
+              { required: true, message: "Введите юридический адрес" },
+              { max: 200, message: "Максимум 200 символов" },
+            ]}>
+            <Input placeholder="Введите полный адрес" />
           </Form.Item>
           <Form.Item
             name="phone"
-            label="Телефон"
-            rules={[{ required: true, message: "Введите телефон" }]}>
-            <Input />
+            label="Контактный телефон"
+            rules={[
+              { required: true, message: "Введите контактный телефон" },
+              {
+                pattern: /^\+?[\d\s\-()]{10,15}$/,
+                message: "Введите корректный номер телефона",
+              },
+            ]}>
+            <Input placeholder="+7 (XXX) XXX-XX-XX" />
           </Form.Item>
         </Form>
       </Modal>

@@ -17,14 +17,14 @@ interface Product {
   id: number;
   name: string;
   description: string;
-  price: string; 
-  imageId: number | null; 
+  price: string;
+  imageId: number | null;
   quantity: number;
   categoryId: number;
   supplierId: number;
-  createdAt: string; 
-  category: Category; 
-  supplier: Supplier; 
+  createdAt: string;
+  category: Category;
+  supplier: Supplier;
 }
 
 export const productApi = api.injectEndpoints({
@@ -35,22 +35,30 @@ export const productApi = api.injectEndpoints({
     getProductById: builder.query<Product, number>({
       query: (id) => `product/${id}`,
     }),
-    createProduct: builder.mutation<any, any>({
-      query: (data) => ({
-        url: `product`,
-        method: "POST",
-        body: data,
+    getProductImage: builder.query<Blob, number>({
+      query: (id) => ({
+        url: `product/${id}/image`,
+        responseHandler: async (response: any) => response.blob(),
+        cache: "no-cache",
       }),
     }),
-    updateProduct: builder.mutation<Product, Partial<Product> & { id: number }>(
-      {
-        query: ({ id, ...data }) => ({
-          url: `product/${id}`,
-          method: "PUT",
-          body: data,
-        }),
-      }
-    ),
+    createProduct: builder.mutation<Product, FormData>({
+      query: (formData) => ({
+        url: `product`,
+        method: "POST",
+        body: formData,
+      }),
+    }),
+    updateProduct: builder.mutation<
+      Product,
+      { id: number; formData: FormData }
+    >({
+      query: ({ id, formData }) => ({
+        url: `product/${id}`,
+        method: "PUT",
+        body: formData,
+      }),
+    }),
     deleteProduct: builder.mutation<{ success: boolean; id: number }, number>({
       query: (id) => ({
         url: `product/${id}`,
@@ -63,6 +71,7 @@ export const productApi = api.injectEndpoints({
 export const {
   useGetProductsQuery,
   useGetProductByIdQuery,
+  useGetProductImageQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,

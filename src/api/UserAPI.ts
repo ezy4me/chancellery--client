@@ -25,6 +25,13 @@ export const userApi = api.injectEndpoints({
         body: data,
       }),
     }),
+    updateUser: builder.mutation<User, { id: number; data: Partial<Omit<User, "id">> }>({
+      query: ({ id, data }) => ({
+        url: `user/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
     deleteUser: builder.mutation<{ success: boolean; id: number }, number>({
       query: (id) => ({
         url: `user/${id}`,
@@ -39,5 +46,6 @@ export const {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
   useCreateUserMutation,
+  useUpdateUserMutation,
   useDeleteUserMutation,
 } = userApi;

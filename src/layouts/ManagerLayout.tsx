@@ -1,25 +1,78 @@
-// import React from "react";
-// import { Outlet } from "react-router-dom";
-// import Sidebar from "../components/Sidebar/Sidebar";
-// import { Box } from "@mui/material";
-// import { FaUserCircle, FaHome } from "react-icons/fa";
+import React from "react";
+import { Layout, Menu, Button } from "antd";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import {
+  UserOutlined,
+  ShoppingCartOutlined,
+  AppstoreOutlined,
+  LogoutOutlined, 
+} from "@ant-design/icons";
+import styles from "./Admin.module.scss";
 
-// const AdminLayout: React.FC = () => {
-//   const links = [
-//     { text: "Dashboard", path: "/employee/dashboard", icon: <FaHome /> },
-//     { text: "Profile", path: "/employee/profile", icon: <FaUserCircle /> },
-//   ];
+const { Header, Sider, Content } = Layout;
 
-//   return (
-//     <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#f7f7f7" }}>
-//       <Sidebar links={links} />
-//       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-//         <Box sx={{ flexGrow: 1, p: 4, backgroundColor: "#fefefe", mt: 8 }}>
-//           <Outlet />
-//         </Box>
-//       </Box>
-//     </Box>
-//   );
-// };
+const ManagerLayout: React.FC = () => {
+  const navigate = useNavigate();
 
-// export default AdminLayout;
+  const handleLogout = () => {
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/");
+    window.location.reload();
+  };
+
+  const menuItems = [
+    {
+      key: "products",
+      icon: <AppstoreOutlined />,
+      label: <Link to="/manager/products">Товары</Link>,
+    },
+    {
+      key: "categories",
+      icon: <AppstoreOutlined />,
+      label: <Link to="/manager/categories">Категории</Link>,
+    },
+    {
+      key: "suppliers",
+      icon: <AppstoreOutlined />,
+      label: <Link to="/manager/suppliers">Поставщики</Link>,
+    },
+    {
+      key: "orders",
+      icon: <ShoppingCartOutlined />,
+      label: <Link to="/manager/orders">Заказы</Link>,
+    },
+    {
+      key: "users",
+      icon: <UserOutlined />,
+      label: <Link to="/manager/users">Пользователи</Link>,
+    },
+  ];
+
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider collapsible>
+        <div className={styles.logo}>«ООО СКАУТ»</div>
+        <Menu theme="dark" mode="inline" items={menuItems} />
+        <div className={styles.logoutContainer}>
+          <Button
+            type="primary"
+            onClick={handleLogout}
+            icon={<LogoutOutlined />} 
+            className={styles.logoutButton}
+          />
+        </div>
+      </Sider>
+      <Layout>
+        <Header className={styles.header}></Header>
+        <Content className={styles.content}>
+          <Outlet />
+        </Content>
+      </Layout>
+    </Layout>
+  );
+};
+
+export default ManagerLayout;

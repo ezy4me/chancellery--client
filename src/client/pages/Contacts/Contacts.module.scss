@@ -168,6 +168,20 @@
   }
 }
 
+.alertContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  max-width: 800px;
+  margin: 0 auto 20px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 768px) {
   .heroSection {
     padding: 40px 0 30px;

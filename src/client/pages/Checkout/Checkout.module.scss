@@ -271,6 +271,20 @@
     }
   }
 
+  .maxQuantityWarning {
+    color: #faad14;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  .quantityInput {
+    width: 80px !important;
+    
+    .ant-input-number-input {
+      text-align: center;
+    }
+  }
+
   @media (max-width: 768px) {
     .checkoutPage {
       padding: 1rem;

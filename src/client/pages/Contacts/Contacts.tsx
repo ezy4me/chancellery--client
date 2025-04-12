@@ -1,17 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   MailOutlined, 
   PhoneOutlined, 
   EnvironmentOutlined, 
   ClockCircleOutlined,
   InstagramOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
-import styles from './Contacts.module.scss';
 import { FaTelegramPlane } from 'react-icons/fa';
+import { message, notification } from 'antd';
+import styles from './Contacts.module.scss';
+import { useSendContactFormMutation } from '../../../api/MailApi';
 
 const Contacts: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [sendContactForm, { isLoading }] = useSendContactFormMutation();
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      message.error('Пожалуйста, заполните обязательные поля');
+      return;
+    }
+
+    try {
+      await sendContactForm(formData).unwrap();
+      notificationApi.success({
+        message: (
+          <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+            <CheckCircleOutlined style={{ color: "#52c41a", marginRight: "8px" }} />
+            Сообщение успешно отправлено!
+          </span>
+        ),
+        description: (
+          <div style={{ marginTop: "8px" }}>
+            <p>Мы получили ваше сообщение.</p>
+            <p>Свяжемся с вами в ближайшее время.</p>
+          </div>
+        ),
+        placement: "topRight",
+        duration: 5,
+        style: {
+          width: "350px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        },
+      });
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    } catch (err) {
+      notificationApi.error({
+        message: "Ошибка отправки сообщения",
+        description: "Пожалуйста, попробуйте еще раз",
+        placement: "topRight",
+      });
+      console.error(err);
+    }
+  };
+
   return (
     <div className={styles.contactsPage}>
+      {notificationContextHolder}
+
       <div className={styles.heroSection}>
         <h1>Свяжитесь с нами</h1>
         <p>Мы всегда рады помочь и ответить на ваши вопросы</p>
@@ -47,21 +113,52 @@ const Contacts: React.FC = () => {
 
         <div className={styles.contactForm}>
           <h2>Напишите нам</h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <input type="text" placeholder="Ваше имя" required />
+              <input 
+                type="text" 
+                name="name"
+                placeholder="Ваше имя" 
+                value={formData.name}
+                onChange={handleChange}
+                required 
+              />
             </div>
             <div className={styles.formGroup}>
-              <input type="email" placeholder="Ваш email" required />
+              <input 
+                type="email" 
+                name="email"
+                placeholder="Ваш email" 
+                value={formData.email}
+                onChange={handleChange}
+                required 
+              />
             </div>
             <div className={styles.formGroup}>
-              <input type="text" placeholder="Тема сообщения" />
+              <input 
+                type="text" 
+                name="subject"
+                placeholder="Тема сообщения" 
+                value={formData.subject}
+                onChange={handleChange}
+              />
             </div>
             <div className={styles.formGroup}>
-              <textarea placeholder="Ваше сообщение" rows={5} required></textarea>
+              <textarea 
+                name="message"
+                placeholder="Ваше сообщение" 
+                rows={5} 
+                value={formData.message}
+                onChange={handleChange}
+                required
+              ></textarea>
             </div>
-            <button type="submit" className={styles.submitButton}>
-              Отправить сообщение
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Отправка...' : 'Отправить сообщение'}
             </button>
           </form>
         </div>

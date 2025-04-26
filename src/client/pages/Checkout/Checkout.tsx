@@ -20,7 +20,7 @@ interface CartItem {
   image?: string | {};
 }
 
-const MAX_QUANTITY = 50; // Максимальное количество одного товара
+const MAX_QUANTITY = 50; 
 
 const paymentMethods = [
   {

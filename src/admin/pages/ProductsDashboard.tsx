@@ -98,7 +98,6 @@ const ProductDashboard: React.FC = () => {
 
   useEffect(() => {
     if (editingProduct) {
-      // Преобразуем строку цены в число перед установкой в форму
       const initialValues = {
         ...editingProduct,
         price: editingProduct.price ? parseFloat(editingProduct.price) : 0,
@@ -165,7 +164,6 @@ const ProductDashboard: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // Преобразуем числовые значения в строки для FormData
       Object.keys(values).forEach((key) => {
         if (values[key] !== undefined && values[key] !== null) {
           const value =

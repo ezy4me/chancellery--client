@@ -83,7 +83,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           userRole === "ADMIN"
             ? "/admin"
             : userRole === "MANAGER"
-            ? "/manager"
+            ? "/manager/orders"
             : "/auth/profile"
         );
       } else {

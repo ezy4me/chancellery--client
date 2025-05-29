@@ -16,7 +16,6 @@ import {
   List,
   Divider,
   Descriptions,
-  Badge,
 } from "antd";
 import {
   DeleteOutlined,
@@ -32,9 +31,12 @@ import {
   MinusOutlined,
   WalletOutlined,
   QuestionOutlined,
+  FileFilled
+  
 } from "@ant-design/icons";
 import {
   useDeleteOrderMutation,
+  useGenerateReportMutation,
   useGetOrdersQuery,
   useUpdateOrderStatusMutation,
 } from "../../api/OrderAPI";
@@ -74,15 +76,12 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   };
 
   return (
-    <Badge
-      status={getStatusColor(status) as any}
-      text={
-        <Text>
-          {getStatusIcon(status)}{" "}
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Text>
-      }
-    />
+    <Space>
+      {getStatusIcon(status)}
+      <Tag color={getStatusColor(status)}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Tag>
+    </Space>
   );
 };
 
@@ -189,13 +188,7 @@ const OrderDetails: React.FC<{ order: any }> = ({ order }) => {
             ]}>
             <List.Item.Meta
               title={<Text>{item.product.name}</Text>}
-              description={`Цена за единицу: ${parseFloat(
-                item.product.price
-              ).toLocaleString("ru-RU", {
-                style: "currency",
-                currency: "RUB",
-                minimumFractionDigits: 2,
-              })}`}
+              description={<Text>{item.description}</Text>}
             />
           </List.Item>
         )}
@@ -214,6 +207,24 @@ const OrderDashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [expandedRowKeys, setExpandedRowKeys] = useState<number[]>([]);
+  const [generateReport] = useGenerateReportMutation(); 
+
+
+  const handleGenerateReport = async (orderId: number) => {
+    try {
+      const reportBlob: any = await generateReport(
+        orderId
+      ).unwrap();
+      const url = URL.createObjectURL(reportBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Заказ_${orderId}.docx`;
+      link.click();
+      URL.revokeObjectURL(url); 
+    } catch (error) {
+      console.error("Ошибка при получении отчета:", error);
+    }
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -300,6 +311,7 @@ const OrderDashboard: React.FC = () => {
       width: 120,
       render: (_: unknown, record: any) => (
         <Space size="small">
+          <Button icon={<FileFilled />} onClick={() => handleGenerateReport(record.id)} />
           <Popconfirm
             title="Удалить заказ?"
             onConfirm={() => handleDelete(record.id)}

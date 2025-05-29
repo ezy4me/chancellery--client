@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8}>
-          <Card bordered={false} hoverable>
+          <Card bordered={false}>
             <Statistic
               title={<Text strong>Пользователи</Text>}
               value={data?.usersCount || 0}
@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={8}>
-          <Card bordered={false} hoverable>
+          <Card bordered={false}>
             <Statistic
               title={<Text strong>Заказы</Text>}
               value={data?.ordersCount || 0}
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={8}>
-          <Card bordered={false} hoverable>
+          <Card bordered={false}>
             <Statistic
               title={<Text strong>Товары</Text>}
               value={data?.productsCount || 0}
@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} sm={12} md={12}>
-          <Card bordered={false} hoverable>
+          <Card bordered={false}>
             <Statistic
               title={<Text strong>Общий доход</Text>}
               value={data?.totalRevenue ? formatCurrency(data.totalRevenue) : '0 ₽'}
@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={12}>
-          <Card bordered={false} hoverable>
+          <Card bordered={false}>
             <Statistic
               title={<Text strong>Уведомления</Text>}
               value={data?.notificationsCount || 0}
@@ -109,7 +109,6 @@ const Dashboard: React.FC = () => {
           <Card 
             title={<Text strong>Последние заказы</Text>}
             bordered={false}
-            hoverable
             headStyle={{ borderBottom: '1px solid #f0f0f0' }}
           >
             <List
@@ -145,7 +144,6 @@ const Dashboard: React.FC = () => {
           <Card 
             title={<Text strong>Новые товары</Text>}
             bordered={false}
-            hoverable
             headStyle={{ borderBottom: '1px solid #f0f0f0' }}
           >
             <List

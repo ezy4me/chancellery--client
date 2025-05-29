@@ -15,6 +15,7 @@ interface Product {
 interface OrderItem {
   id: number;
   quantity: number;
+  description: string;
   price: string;
   orderId: number;
   productId: number;
@@ -32,6 +33,7 @@ interface Order {
   id: number;
   totalPrice: string;
   status: string;
+  description: string;
   createdAt: string;
   confirmedAt?: string;
   payment: string;
@@ -85,6 +87,13 @@ export const orderApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+     generateReport: builder.mutation<void, number>({
+      query: (orderId) => ({
+        url: `orders/${orderId}/document`,
+        method: "GET",
+        responseHandler: (response: any) => response.blob(),
+      }),
+    }),
   }),
 });
 
@@ -95,4 +104,5 @@ export const {
   useCreateOrderMutation,
   useUpdateOrderStatusMutation,
   useDeleteOrderMutation,
+  useGenerateReportMutation,
 } = orderApi;

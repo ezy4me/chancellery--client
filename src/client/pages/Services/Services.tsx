@@ -111,7 +111,6 @@ const Services: React.FC = () => {
         {categories?.map((category: any) => (
           <Col xs={24} md={12} lg={8} key={category.id}>
             <Card
-              hoverable
               className={styles.categoryCard}
               cover={
                 <div

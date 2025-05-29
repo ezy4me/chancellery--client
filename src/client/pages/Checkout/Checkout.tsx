@@ -1,4 +1,13 @@
-import { Spin, Alert, Radio, Card, Button, Divider, notification, InputNumber } from "antd";
+import {
+  Spin,
+  Alert,
+  Radio,
+  Card,
+  Button,
+  Divider,
+  notification,
+  InputNumber,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./Checkout.module.scss";
@@ -11,16 +20,18 @@ import {
   WalletOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
+import { useGetProductImageQuery } from "../../../api/ProductAPI";
 
 interface CartItem {
   id: number;
   name: string;
   price: number;
   quantity: number;
-  image?: string | {};
+  imageId?: string | {};
+  selectedParams?: string[];
 }
 
-const MAX_QUANTITY = 50; 
+const MAX_QUANTITY = 50;
 
 const paymentMethods = [
   {
@@ -43,6 +54,116 @@ const paymentMethods = [
   },
 ];
 
+const ProductParams: React.FC<{
+  productName: string;
+  selectedParams: string[];
+  onParamsChange: (params: string[]) => void;
+}> = ({ productName, selectedParams = [], onParamsChange }) => {
+  const PARAMS_CONFIG = {
+    Визитки: [
+      { name: "Формат", options: ["90×50 мм", "85×55 мм"] },
+      { name: "Материал", options: ["Глянец", "Мат", "Картон"] },
+      { name: "Ламинация", options: ["Да", "Нет"] },
+    ],
+    Буклеты: [
+      { name: "Размер", options: ["A4", "A5", "A6"] },
+      { name: "Тип фальцовки", options: ["Евро", "Книжная"] },
+      { name: "Плотность", options: ["130 г/м²", "170 г/м²"] },
+    ],
+    Плакаты: [
+      { name: "Размер", options: ["A3", "A2", "A1"] },
+      { name: "Материал", options: ["Бумага", "Баннерная ткань"] },
+    ],
+    Стикеры: [
+      { name: "Форма", options: ["Круглые", "Квадратные", "Овальные"] },
+      { name: "Размер", options: ["50×50 мм", "70×30 мм"] },
+    ],
+    Листовки: [
+      { name: "Формат", options: ["A4", "A5", "A6"] },
+      { name: "Печать", options: ["Односторонняя", "Двусторонняя"] },
+    ],
+  };
+
+  const currentConfig =
+    PARAMS_CONFIG[productName as keyof typeof PARAMS_CONFIG] || [];
+
+  const handleParamSelect = (paramName: string, value: string) => {
+    const newParamStr = `${paramName}: ${value}`;
+    const updatedParams = selectedParams.includes(newParamStr)
+      ? selectedParams.filter((p) => !p.startsWith(paramName))
+      : [
+          ...selectedParams.filter((p) => !p.startsWith(paramName)),
+          newParamStr,
+        ];
+
+    onParamsChange(updatedParams);
+  };
+
+  return (
+    <div className={styles.paramsContainer}>
+      {currentConfig.map((param) => (
+        <div key={param.name} className={styles.paramGroup}>
+          <div className={styles.paramName}>{param.name}:</div>
+          <div className={styles.paramOptions}>
+            {param.options.map((option) => (
+              <Button
+                key={option}
+                size="small"
+                type={
+                  selectedParams.includes(`${param.name}: ${option}`)
+                    ? "primary"
+                    : "default"
+                }
+                onClick={() => handleParamSelect(param.name, option)}
+                className={styles.paramButton}>
+                {option}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+interface ProductImageProps {
+  productId: number;
+  hasImage: boolean;
+  alt: string;
+  className?: string;
+}
+
+const ProductImage: React.FC<ProductImageProps> = ({
+  productId,
+  hasImage,
+  alt,
+  className,
+}) => {
+  const [imageUrl, setImageUrl] = useState<string>("/placeholder.jpg");
+  const { data: imageBlob } = useGetProductImageQuery(productId, {
+    skip: !hasImage,
+  });
+
+  useEffect(() => {
+    if (imageBlob) {
+      const url = URL.createObjectURL(imageBlob);
+      setImageUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [imageBlob]);
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className={className}
+      onError={(e) => {
+        e.currentTarget.src = "/placeholder.jpg";
+      }}
+    />
+  );
+};
+
 const Checkout: React.FC = () => {
   const [notificationApi, notificationContextHolder] =
     notification.useNotification();
@@ -53,7 +174,8 @@ const Checkout: React.FC = () => {
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [showWarningNotification, setShowWarningNotification] = useState(false);
-  const [showMaxQuantityNotification, setShowMaxQuantityNotification] = useState(false);
+  const [showMaxQuantityNotification, setShowMaxQuantityNotification] =
+    useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -159,11 +281,14 @@ const Checkout: React.FC = () => {
       productId: item.id,
       quantity: item.quantity,
       price: item.price,
+      description: [item.name, item.selectedParams?.join(", ") || ""]
+        .filter(Boolean)
+        .join(" - "),
     }));
 
     const orderData = {
-      orderItems: orderItems,
-      totalPrice: totalPrice,
+      orderItems,
+      totalPrice,
       payment: paymentMethod,
       status: "pending",
       userId: userId,
@@ -231,39 +356,45 @@ const Checkout: React.FC = () => {
             <Card title="Ваш заказ" className={styles.cartCard}>
               <div className={styles.cartList}>
                 {cart.map((item) => {
-                  const isImageEmpty =
-                    item.image &&
-                    typeof item.image === "object" &&
-                    Object.keys(item.image).length === 0;
-                  const imageSrc =
-                    isImageEmpty || !item.image
-                      ? "/placeholder.jpg"
-                      : typeof item.image === "string"
-                      ? item.image
-                      : "/placeholder.jpg";
-
                   return (
                     <div key={item.id} className={styles.cartItem}>
-                      <img
-                        src={imageSrc}
+                      <ProductImage
+                        productId={item.id}
+                        hasImage={item.imageId !== null}
                         alt={item.name}
                         className={styles.cartItemImage}
-                        onError={(e) => {
-                          e.currentTarget.src = "/placeholder.jpg";
-                          e.currentTarget.onerror = null;
-                        }}
                       />
                       <div className={styles.itemDetails}>
                         <h3>{item.name}</h3>
                         <p className={styles.price}>
                           {item.price.toLocaleString()} ₽
                         </p>
+
+                        <ProductParams
+                          productName={item.name}
+                          selectedParams={item.selectedParams || []}
+                          onParamsChange={(params) => {
+                            const updatedCart = cart.map((cartItem) =>
+                              cartItem.id === item.id
+                                ? { ...cartItem, selectedParams: params }
+                                : cartItem
+                            );
+                            setCart(updatedCart);
+                            localStorage.setItem(
+                              "cart",
+                              JSON.stringify(updatedCart)
+                            );
+                          }}
+                        />
+
                         <div className={styles.itemControls}>
                           <InputNumber
                             min={1}
                             max={MAX_QUANTITY}
                             value={item.quantity}
-                            onChange={(value) => updateQuantity(item.id, Number(value))}
+                            onChange={(value) =>
+                              updateQuantity(item.id, Number(value))
+                            }
                             className={styles.quantityInput}
                           />
                           <Button
